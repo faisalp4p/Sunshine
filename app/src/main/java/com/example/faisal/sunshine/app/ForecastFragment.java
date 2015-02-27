@@ -177,7 +177,7 @@ public class ForecastFragment extends Fragment {
                     return null;
                 }
                 forecastJsonStr = buffer.toString();
-                Log.v(LOG_TAG, forecastJsonStr);
+//                Log.v(LOG_TAG, forecastJsonStr);
             } catch (IOException e) {
                 Log.e(LOG_TAG, "Error ", e);
                 e.printStackTrace();
@@ -272,9 +272,9 @@ public class ForecastFragment extends Fragment {
 
 
             }
-            for (String s: resultStr) {
-                Log.v("ForecastFragment", "Forecast Entry: " + s);
-            }
+//            for (String s: resultStr) {
+//                Log.v("ForecastFragment", "Forecast Entry: " + s);
+//            }
             return resultStr;
         }
     }
