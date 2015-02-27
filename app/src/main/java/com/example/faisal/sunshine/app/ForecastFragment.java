@@ -209,6 +209,18 @@ public class ForecastFragment extends Fragment {
             return result;
         }
 
+        protected void onPostExecute(String[] forecastArray) {
+
+            List<String> weekForecast = new ArrayList<String>(Arrays.asList(forecastArray));
+            mForecastAdapter.clear();
+            for(String s: weekForecast) {
+                mForecastAdapter.add(s);
+            }
+            mForecastAdapter.notifyDataSetChanged();
+            //mForecastAdapter.addAll(weekForecast);
+
+        }
+
         private String getReadableDateString(long time) {
             SimpleDateFormat shortenedDateFormat = new SimpleDateFormat("EEE MMM dd");
             return shortenedDateFormat.format(time);
