@@ -20,6 +20,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.text.format.Time;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -30,12 +31,17 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -110,12 +116,13 @@ public class ForecastFragment extends Fragment {
         return rootView;
     }
 
-    public class FetchWeatherTask extends AsyncTask<String, Void, Void> {
+
+    public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
 
         private final String LOG_TAG = FetchWeatherTask.class.getSimpleName();
 
         @Override
-        protected Void doInBackground(String... params) {
+        protected String[] doInBackground(String... params) {
             // These two need to be declared outside the try/catch
             // so that they can be closed in the finally block.
             HttpURLConnection urlConnection = null;
@@ -129,7 +136,7 @@ public class ForecastFragment extends Fragment {
                     .appendPath("daily")
                     .appendQueryParameter("q", params[0])
                     .appendQueryParameter("mode", "json")
-                    .appendQueryParameter("cnt", "7");
+                    .appendQueryParameter("cnt", "7").build();
 
             // Will contain the raw JSON response as a string.
             String forecastJsonStr = null;
@@ -139,12 +146,15 @@ public class ForecastFragment extends Fragment {
                 // Possible parameters are avaiable at OWM's forecast API page, at
                 // http://openweathermap.org/API#forecast
                 //URL url = new URL("http://api.openweathermap.org/data/2.5/forecast/daily?q=94043&mode=json&units=metric&cnt=7");
-                URL url = new URL(builder.build().toString());
+                URL url = new URL(builder.toString());
+                //Log.i("asd", builder.toString());
                 //Log.i(LOG_TAG, "URL - " + builder.toString());
                 // Create the request to OpenWeatherMap, and open the connection
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setRequestMethod("GET");
                 urlConnection.connect();
+
+                //here is the error
 
                 // Read the input stream into a String
                 InputStream inputStream = urlConnection.getInputStream();
@@ -154,7 +164,6 @@ public class ForecastFragment extends Fragment {
                     return null;
                 }
                 reader = new BufferedReader(new InputStreamReader(inputStream));
-
                 String line;
                 while ((line = reader.readLine()) != null) {
                     // Since it's JSON, adding a newline isn't necessary (it won't affect parsing)
@@ -171,6 +180,7 @@ public class ForecastFragment extends Fragment {
                 Log.v(LOG_TAG, forecastJsonStr);
             } catch (IOException e) {
                 Log.e(LOG_TAG, "Error ", e);
+                e.printStackTrace();
                 // If the code didn't successfully get the weather data, there's no point in attemping
                 // to parse it.
                 return null;
@@ -186,7 +196,74 @@ public class ForecastFragment extends Fragment {
                     }
                 }
             }
-            return null;
+            int NUM_DAYS = 7;
+            String[] result = new String[NUM_DAYS];
+            try {
+                result = getWeatherDataFromString(forecastJsonStr, NUM_DAYS);
+
+            } catch (JSONException e) {
+
+                Log.e("FetchWeatherTask", e.getMessage());
+                e.printStackTrace();
+            }
+            return result;
+        }
+
+        private String getReadableDateString(long time) {
+            SimpleDateFormat shortenedDateFormat = new SimpleDateFormat("EEE MMM dd");
+            return shortenedDateFormat.format(time);
+        }
+
+        private  String formatHighLows(double high, double low) {
+
+            long roundHigh = Math.round(high);
+            long roundLow = Math.round(low);
+
+            String highLowStr = roundHigh + " / " + roundLow;
+            return highLowStr;
+        }
+
+        private String[] getWeatherDataFromString(String forecastJsonStr, int numDays)
+                throws JSONException{
+
+            JSONObject forecastJson = new JSONObject(forecastJsonStr);
+            JSONArray weatherArray = forecastJson.getJSONArray("list");
+
+            Time dayTime = new Time();
+            dayTime.setToNow();
+
+            int julianStartDay = Time.getJulianDay(System.currentTimeMillis(), dayTime.gmtoff);
+            dayTime = new Time();
+            String[] resultStr = new String[numDays];
+            for (int i=0; i< numDays; i++) {
+
+                String day;
+                String description;
+                String highAndLow;
+
+                JSONObject dayForecast = weatherArray.getJSONObject(i);
+
+                long dateTime;
+
+                dateTime = dayTime.setJulianDay(julianStartDay + i);
+                day = getReadableDateString(dateTime);
+
+                JSONObject weatherObject = dayForecast.getJSONArray("weather").getJSONObject(0);
+                description = weatherObject.getString("description");
+
+                JSONObject tempObject = dayForecast.getJSONObject("temp");
+                double high = tempObject.getDouble("max");
+                double low = tempObject.getDouble("min");
+
+                highAndLow = formatHighLows(high, low);
+                resultStr[i] = day + " - " + description + " - " + highAndLow;
+
+
+            }
+            for (String s: resultStr) {
+                Log.v("ForecastFragment", "Forecast Entry: " + s);
+            }
+            return resultStr;
         }
     }
 }
