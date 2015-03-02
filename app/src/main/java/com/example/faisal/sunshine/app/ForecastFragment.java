@@ -16,6 +16,7 @@
 package com.example.faisal.sunshine.app;
 
 import android.animation.AnimatorSet;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -121,6 +122,10 @@ public class ForecastFragment extends Fragment {
                 Toast toast = Toast.makeText(getActivity(), mForecastAdapter.getItem(position),
                         Toast.LENGTH_SHORT);
                 toast.show();
+
+                Intent detailIntent = new Intent(getActivity(), DetailActivity.class);
+                detailIntent.putExtra(Intent.EXTRA_TEXT, mForecastAdapter.getItem(position));
+                startActivity(detailIntent);
             }
         });
 
