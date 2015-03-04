@@ -74,6 +74,22 @@ public class ForecastFragment extends Fragment {
         inflater.inflate(R.menu.forecastfragment, menu);
     }
 
+    public void updateWeather() {
+
+        preferences = PreferenceManager.getDefaultSharedPreferences(this.getActivity());
+        String location = preferences.getString(getString(R.string.pref_location_key),
+                getString(R.string.pref_location_default));
+        new FetchWeatherTask().execute(location);
+        return true
+
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        updateWeather();
+    }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
@@ -81,10 +97,7 @@ public class ForecastFragment extends Fragment {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
         if (id == R.id.action_refresh) {
-            preferences = PreferenceManager.getDefaultSharedPreferences(this.getActivity());
-            String location = preferences.getString(getString(R.string.pref_location_key),
-                    getString(R.string.pref_location_default));
-            new FetchWeatherTask().execute(location);
+            updateWeather();
             return true;
         }
         return super.onOptionsItemSelected(item);
