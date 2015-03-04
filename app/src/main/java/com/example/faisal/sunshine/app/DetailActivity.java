@@ -44,6 +44,9 @@ public class DetailActivity extends ActionBarActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            Intent settingsIntent = new Intent(this, SettingsActivity.class);
+            //detailIntent.putExtra(Intent.EXTRA_TEXT, mForecastAdapter.getItem(position));
+            startActivity(settingsIntent);
             return true;
         }
 
