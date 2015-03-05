@@ -86,6 +86,15 @@ public class ForecastFragment extends Fragment {
 
     }
 
+    public void startMap() {
+        preferences = PreferenceManager.getDefaultSharedPreferences(this.getActivity());
+        String location = preferences.getString(getString(R.string.pref_location_key),
+                getString(R.string.pref_location_default));
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.setData(Uri.parse("geo:0,0?q="+location));
+        startActivity(intent);
+    }
+
     @Override
     public void onStart() {
         super.onStart();
@@ -100,6 +109,10 @@ public class ForecastFragment extends Fragment {
         int id = item.getItemId();
         if (id == R.id.action_refresh) {
             updateWeather();
+            return true;
+        }
+        if (id == R.id.action_map_view) {
+            startMap();
             return true;
         }
         return super.onOptionsItemSelected(item);
