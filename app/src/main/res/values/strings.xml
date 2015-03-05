@@ -7,4 +7,9 @@
     <string name="pref_location_label">Location</string>
     <string name="pref_location_key">location</string>
     <string name="pref_location_default">682021</string>
+
+    <string name="pref_unit_key">unit</string>
+    <string name="pref_unit_default">metric</string>
+    <string name="pref_unit_title">Temperature Unit</string>
+
 </resources>

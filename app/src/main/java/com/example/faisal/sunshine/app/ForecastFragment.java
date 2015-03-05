@@ -79,8 +79,10 @@ public class ForecastFragment extends Fragment {
         preferences = PreferenceManager.getDefaultSharedPreferences(this.getActivity());
         String location = preferences.getString(getString(R.string.pref_location_key),
                 getString(R.string.pref_location_default));
-        new FetchWeatherTask().execute(location);
-        return true
+        String unit = preferences.getString(getString(R.string.pref_unit_key),
+                getString(R.string.pref_unit_default));
+        new FetchWeatherTask().execute(location, unit);
+        return;
 
     }
 
@@ -171,6 +173,7 @@ public class ForecastFragment extends Fragment {
                     .appendPath("forecast")
                     .appendPath("daily")
                     .appendQueryParameter("q", params[0])
+                    .appendQueryParameter("units", params[1])
                     .appendQueryParameter("mode", "json")
                     .appendQueryParameter("cnt", "7").build();
 
